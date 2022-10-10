@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>hotelList</title>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css">
+        <style>
+            [v-cloak] {
+                display: none;
+            }
+            .ellipsis {
+                overflow:hidden;
+                display: -webkit-box;
+                white-space: normal;
+                text-overflow: ellipsis;
+                -webkit-line-clamp: 5; 
+                -webkit-box-orient: vertical;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="app" v-cloak>
+            <div class="row m-3">
+                <div class="col-2 " >
+                    <div class="container border ">
+                        <b>透過以下分類搜尋:<br>(未完成)</b>
+                        <hr/>
+                        <button type="button" class="btn btn-dark mb-3" data-toggle="collapse" data-target="#searchOption">飯店設施</button>
+                        <div id="searchOption"  class="collapse ">
+                            <div v-for="tag in tags">
+                                <label>
+                                    <input type="checkbox" :id="tag" :value="tag" v-model="selectedTags">
+                                    {{tag}}
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-10">
+
+                    <div class="row">
+                        <div class="col">
+                            <h4>找到 {{hotels.length}} 間住宿</h4>
+                        </div>
+                        <div class="float-right  dropdown-menu-end">
+                            <button type="button" class="btn btn-outline-dark dropdown-toggle m-1" data-toggle="dropdown">排序</button>
+                            <div class="dropdown-menu text-center">
+                                <button class="dropdown-item" @click="sortByID">一般排序</button>
+                                <button class="dropdown-item" @click="sortByScore">為您精選</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row border mb-3"  v-for="h in hotels">
+                        <div class="col-md-3 " style="height: 200px;">
+                            <img :src= "h.thumbnail"  alt="thumbnail" class="mh-100">
+                        </div>
+                        <div class="col-md-7">
+                            <h4 id="h.name" class="pt-3">{{ h.name }}</h2>
+                            <span style = "color: red;"><i class="bi-geo-alt" ></i>{{h.location}}</span>
+                            <p class="ellipsis">{{ h.intro }}</p>
+                        </div>
+                        <div class="col-md-2" >
+                            <div class="row  no-gutters align-items-end" style="position: absolute; right: 10px; top:10px;">
+                                <b v-if="h.score >= 4.5">好極了&nbsp</b>
+                                <b v-else-if="h.score < 4.5 & h.score >= 4.0">非常好&nbsp </b>
+                                <b v-else>不錯&nbsp</b> 
+                                <span class="badge badge-danger" style="font-size: 25px;">{{h.score.toFixed(1)}}</span>
+                            </div>
+                            <div  style="position: absolute; bottom: 10px; right: 10px;">
+                                <b style="font-size: 20px;">NT${{h.price}}&nbsp</b>起
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <script src="https://unpkg.com/vue@next"></script>
+            <script>
+            let app = Vue.createApp({
+                data(){
+                    return{
+                        hotels:[],
+                        tags:["免費無線網路","禁菸客房", "廚房","洗衣房","停車場","寵物友善"],
+                        selectedTags:[]
+                    }
+                },
+                methods:{
+                    sortByID(){
+                        this.hotels.sort((a, b) => a.id - b.id)
+                    },
+                    sortByScore(){
+                        this.hotels.sort((a, b) => b.score - a.score)
+                    }
+                },
+                async mounted(){
+                    const res = await fetch('hotel.json')
+                    const data = await res.json()
+                    this.hotels = data
+                }
+            })
+            app.mount('#app')
+        </script>
+        
+    </body>
+</html>
